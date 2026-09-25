@@ -1,18 +1,19 @@
 import { computed } from 'vue'
 
-import {
-  restorationBatches,
-  restorationEnvironment,
-  restorationTasks,
-} from '../data/restorationData'
+import { restorationEnvironment } from '../data/restorationData'
+import { useBatchRegistry } from './useBatchRegistry'
 
 export function useRestorationOverview() {
-  const batchCount = computed(() => restorationBatches.length)
+  const { batches, taskRows } = useBatchRegistry()
+
+  const batchCount = computed(() => batches.value.length)
   const highRiskCount = computed(
-    () => restorationTasks.filter((item) => item.risk === 'high').length,
+    () => taskRows.value.filter((item) => item.risk === 'high').length,
   )
   const environmentCount = computed(() => restorationEnvironment.length)
-  const ownerCount = computed(() => new Set(restorationTasks.map((item) => item.owner)).size)
+  const ownerCount = computed(
+    () => new Set(taskRows.value.map((item) => item.owner)).size,
+  )
 
   return {
     batchCount,

@@ -20,10 +20,15 @@ defineProps({
     </div>
     <div
       v-for="row in rows"
-      :key="`${row.title}-${row.owner}`"
+      :key="row.key"
       class="task-row"
     >
-      <span>{{ row.title }}</span>
+      <span>
+        <RouterLink class="task-link" :to="{ name: 'batches', query: { code: row.code } }">
+          {{ row.title }}
+        </RouterLink>
+        <small class="task-code">批次 {{ row.code }}</small>
+      </span>
       <span>{{ row.stage }}</span>
       <span :class="['risk-tag', `risk-tag--${riskMeta(row.risk).tone}`]">
         {{ riskMeta(row.risk).label }}
@@ -59,6 +64,25 @@ defineProps({
   color: #775936;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  font-size: 0.76rem;
+}
+
+.task-link {
+  color: #5d4322;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(93, 67, 34, 0.5);
+}
+
+.task-link:hover {
+  color: #8b6314;
+  border-bottom-color: #8b6314;
+}
+
+.task-code {
+  display: block;
+  margin-top: 2px;
+  color: #82684b;
   font-size: 0.76rem;
 }
 

@@ -1,20 +1,34 @@
 <script setup>
+import { useRouter } from 'vue-router'
+
 import { riskMeta } from '../../utils/restorationFormatters'
+import StageControl from './StageControl.vue'
 
 defineProps({
   items: {
     type: Array,
     required: true,
   },
+  activeKey: {
+    type: String,
+    default: '',
+  },
 })
+
+const router = useRouter()
+
+function showDuplicates(key) {
+  router.push({ name: 'batches', query: { view: 'duplicates', key } })
+}
 </script>
 
 <template>
   <div class="batch-grid">
     <article
       v-for="item in items"
-      :key="item.code"
-      class="batch-card"
+      :id="`batch-${item.key}`"
+      :key="item.key"
+      :class="['batch-card', { 'batch-card--active': item.key === activeKey }]"
     >
       <div class="batch-head">
         <small>批次 {{ item.code }}</small>
@@ -23,9 +37,17 @@ defineProps({
         </span>
       </div>
       <h4>{{ item.title }}</h4>
-      <p>页码：{{ item.pages }}</p>
-      <p>阶段：{{ item.status }}</p>
-      <small>{{ item.note }}</small>
+      <p>页码：{{ item.pages || '待补充' }}</p>
+      <StageControl :code="item.code" :status="item.status" />
+      <small class="batch-note">{{ item.note }}</small>
+      <button
+        v-if="item.duplicates.length"
+        type="button"
+        class="dup-chip"
+        @click="showDuplicates(item.key)"
+      >
+        {{ item.duplicates.length }} 条重复登记
+      </button>
     </article>
   </div>
 </template>
@@ -38,10 +60,19 @@ defineProps({
 }
 
 .batch-card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
   padding: 18px;
   border-radius: 20px;
   background: #f4ebda;
   border: 1px solid rgba(109, 80, 40, 0.08);
+  scroll-margin-top: 24px;
+}
+
+.batch-card--active {
+  border-color: #8b6314;
+  box-shadow: 0 0 0 3px rgba(139, 99, 20, 0.22);
 }
 
 .batch-head {
@@ -59,7 +90,6 @@ small {
 
 h4 {
   font-size: 1.04rem;
-  margin-top: 10px;
 }
 
 p,
@@ -67,9 +97,8 @@ small {
   color: #6a5439;
 }
 
-p + p,
-p + small {
-  margin-top: 6px;
+.batch-note {
+  margin-top: 2px;
 }
 
 .risk-pill {
@@ -91,6 +120,23 @@ p + small {
 .risk-pill--low {
   background: #d9ead9;
   color: #366338;
+}
+
+.dup-chip {
+  justify-self: start;
+  margin-top: 4px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 999px;
+  background: #efe2ca;
+  color: #7e6038;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.dup-chip:hover {
+  background: #e4d2b2;
 }
 
 @media (max-width: 960px) {
