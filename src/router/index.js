@@ -25,7 +25,9 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior() {
+  scrollBehavior(to) {
+    // 带批次编码进入档案页时由视图负责滚动定位，不强制回到顶部
+    if (to.query.code) return false
     return { top: 0 }
   },
 })

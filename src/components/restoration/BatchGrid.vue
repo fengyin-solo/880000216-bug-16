@@ -6,15 +6,37 @@ defineProps({
     type: Array,
     required: true,
   },
+  editable: {
+    type: Boolean,
+    default: false,
+  },
+  stages: {
+    type: Array,
+    default: () => [],
+  },
+  highlightKey: {
+    type: String,
+    default: '',
+  },
 })
+
+const emit = defineEmits(['change-status'])
+
+function onStatusChange(code, event) {
+  emit('change-status', { code, status: event.target.value })
+}
 </script>
 
 <template>
   <div class="batch-grid">
     <article
       v-for="item in items"
-      :key="item.code"
-      class="batch-card"
+      :id="`batch-card-${item.key ?? item.code}`"
+      :key="item.key ?? item.code"
+      :class="[
+        'batch-card',
+        { 'batch-card--highlight': (item.key ?? item.code) === highlightKey },
+      ]"
     >
       <div class="batch-head">
         <small>批次 {{ item.code }}</small>
@@ -24,7 +46,15 @@ defineProps({
       </div>
       <h4>{{ item.title }}</h4>
       <p>页码：{{ item.pages }}</p>
-      <p>阶段：{{ item.status }}</p>
+      <p v-if="!editable">阶段：{{ item.status }}</p>
+      <label v-else class="status-field">
+        阶段：
+        <select :value="item.status" @change="onStatusChange(item.code, $event)">
+          <option v-for="stage in stages" :key="stage" :value="stage">
+            {{ stage }}
+          </option>
+        </select>
+      </label>
       <small>{{ item.note }}</small>
     </article>
   </div>
@@ -42,6 +72,14 @@ defineProps({
   border-radius: 20px;
   background: #f4ebda;
   border: 1px solid rgba(109, 80, 40, 0.08);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.batch-card--highlight {
+  border-color: #5d4322;
+  box-shadow: 0 0 0 3px rgba(93, 67, 34, 0.18);
 }
 
 .batch-head {
@@ -68,8 +106,25 @@ small {
 }
 
 p + p,
-p + small {
+p + small,
+p + .status-field,
+.status-field + small {
   margin-top: 6px;
+}
+
+.status-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6a5439;
+}
+
+.status-field select {
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(109, 80, 40, 0.24);
+  background: rgba(255, 255, 255, 0.85);
+  color: #4d3a22;
 }
 
 .risk-pill {
